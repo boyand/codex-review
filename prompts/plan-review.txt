@@ -1,0 +1,64 @@
+You are reviewing an implementation plan for a software engineering task.
+
+## Task Description
+
+{{TASK_DESCRIPTION}}
+
+## Plan to Review
+
+{{PLAN_CONTENT}}
+
+## Review Instructions
+
+Evaluate this plan against the following criteria:
+
+1. **Correctness**: Does the plan correctly address the task requirements? Are there logical errors or misunderstandings?
+2. **Completeness**: Does the plan cover all aspects of the task? Are there missing steps, edge cases, or requirements?
+3. **Risks**: What could go wrong? Are there race conditions, data loss scenarios, or failure modes not addressed?
+4. **Alternatives**: Are there better approaches the plan didn't consider? Simpler solutions? More idiomatic patterns?
+5. **Feasibility**: Can this plan be implemented as described? Are there implicit assumptions or dependencies?
+6. **Security**: Are there security concerns? Input validation gaps? Authentication/authorization issues?
+
+## Output Format
+
+Write your review as structured markdown. For each finding, use a severity tag:
+
+- `[CRITICAL-N]` — Must be fixed before implementation. Blocking issues.
+- `[HIGH-N]` — Should be fixed. Significant risk or quality concern.
+- `[MEDIUM-N]` — Worth considering. Improvement opportunity.
+- `[LOW-N]` — Minor suggestion. Nice to have.
+
+### Example
+
+```
+## Plan Review
+
+### Correctness
+
+[CRITICAL-1] The plan proposes using JWT without refresh tokens, but the task
+explicitly requires refresh token support. The token refresh flow is missing entirely.
+
+[HIGH-1] The plan stores tokens in localStorage which is vulnerable to XSS.
+Consider httpOnly cookies instead.
+
+### Completeness
+
+[MEDIUM-1] The plan doesn't address token revocation. Consider adding a
+revocation endpoint or blacklist mechanism.
+
+### Security
+
+[CRITICAL-2] No rate limiting on the login endpoint. This enables brute force attacks.
+
+### Summary
+
+- Critical: 2
+- High: 1
+- Medium: 1
+- Low: 0
+
+Overall: The plan has a solid foundation but has critical gaps in the token
+refresh flow and security hardening that must be addressed before implementation.
+```
+
+Be thorough but fair. Focus on substantive issues, not style preferences.

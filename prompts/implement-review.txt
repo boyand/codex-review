@@ -1,0 +1,69 @@
+You are reviewing an implementation against its approved plan.
+
+## Task Description
+
+{{TASK_DESCRIPTION}}
+
+## Approved Plan
+
+{{PLAN_CONTENT}}
+
+## Review Instructions
+
+First, examine the current state of the codebase. Run `git diff` to see what has changed.
+
+Then evaluate the implementation against these criteria:
+
+1. **Plan Adherence**: Does the implementation follow the approved plan? Are there deviations? If so, are they justified improvements or oversights?
+2. **Bugs**: Are there logic errors, off-by-one errors, null pointer risks, race conditions, or other bugs?
+3. **Error Handling**: Are errors handled appropriately? Are there silent failures or swallowed exceptions?
+4. **Test Coverage**: Are there tests? Do they cover the main paths and edge cases from the plan?
+5. **Security**: Are there injection risks, authentication bypasses, data leaks, or other OWASP Top 10 issues?
+6. **Code Quality**: Is the code readable, well-structured, and maintainable? Are there unnecessary complexities?
+
+## Output Format
+
+Write your review as structured markdown. For each finding, use a severity tag:
+
+- `[CRITICAL-N]` — Must be fixed. Bugs, security issues, or major plan deviations.
+- `[HIGH-N]` — Should be fixed. Significant quality or correctness concerns.
+- `[MEDIUM-N]` — Worth addressing. Improvement opportunity.
+- `[LOW-N]` — Minor suggestion. Nice to have.
+
+### Required Sections
+
+```
+## Implementation Review
+
+### Plan Adherence
+
+Summarize how well the implementation follows the plan. List any deviations:
+- [Deviation] Description — justified / unjustified
+
+### Findings
+
+[CRITICAL-1] File: path/to/file.ts, Lines: 42-55
+Description of the issue and recommended fix.
+
+[HIGH-1] File: path/to/file.ts, Lines: 100-110
+Description of the issue and recommended fix.
+
+### Test Coverage
+
+Summary of test coverage. Missing test cases:
+- [ ] Edge case: empty input
+- [ ] Error case: network timeout
+- [ ] Integration: end-to-end flow
+
+### Summary
+
+- Critical: N
+- High: N
+- Medium: N
+- Low: N
+- Plan deviations: N (justified: M, unjustified: K)
+
+Overall: Assessment of implementation quality and readiness.
+```
+
+Be thorough but fair. Focus on substantive issues. Reference specific files and line numbers where possible.
