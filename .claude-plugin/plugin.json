@@ -2,6 +2,9 @@
   "name": "codex-review-loop",
   "version": "0.1.0",
   "description": "N-phase review loop with OpenAI Codex. Automatic plan and implementation review with dynamic phase insertion.",
-  "author": "boyand",
+  "author": {
+    "name": "boyand",
+    "url": "https://github.com/boyand"
+  },
   "homepage": "https://github.com/boyand/codex-review-loop"
 }

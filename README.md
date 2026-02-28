@@ -1,18 +1,21 @@
 # codex-review-loop
 
-A Claude Code plugin that creates an N-phase review loop with OpenAI Codex. Every time Claude stops, Codex automatically reviews the work and Claude must address each finding with justification.
+A Claude Code plugin that creates an N-phase loop with dynamic Claude/Codex role chaining. Each phase can choose who does the work and who reviews it.
 
 ## Features
 
-- **Automatic reviews**: Stop hook fires Codex review every time Claude completes a phase
+- **Dynamic role chaining**: Configure `worker` and `reviewer` per phase (`claude` or `codex`)
+- **Automatic Codex execution**: Hook can run Codex as worker and/or reviewer based on phase config
+- **Single decision ledger**: One canonical file tracks agreed fix/no-fix outcomes and user selection
 - **N-phase pipeline**: Default plan + implement, but add custom phases at any approval gate
 - **Finding accountability**: Claude must ACCEPT/REJECT/FIX every finding with justification
 - **Dynamic phase insertion**: Add phases like "test", "refactor", "security audit" on the fly
 - **Cross-phase comparison**: Implementation is reviewed against the approved plan
-- **Fail-open**: Errors never trap you — the hook allows stop with an explanation
+- **Fail-safe progression**: Errors block progression with clear recovery instructions (no silent phase advancement)
 
 ## Prerequisites
 
+- [Go](https://go.dev/dl/) toolchain (1.22+)
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI
 - [OpenAI Codex](https://github.com/openai/codex) CLI (`npm install -g @openai/codex`)
 
@@ -36,14 +39,18 @@ claude plugin add github:boyand/codex-review-loop
 /codex-review-loop Build JWT auth with refresh tokens
 ```
 
-This starts a two-phase pipeline:
+This starts a default two-phase pipeline:
 
-1. **Plan** — Claude analyzes the codebase and writes a plan. Codex reviews it.
-2. **Implement** — Claude implements the plan. Codex reviews against the plan.
+1. **Plan** — `worker=claude`, `reviewer=codex`
+2. **Implement** — `worker=claude`, `reviewer=codex`
+
+You can override roles in the loop state (or via your command flow) so phases can be chained like:
+- plan: `worker=codex`, `reviewer=claude`
+- implement: `worker=claude`, `reviewer=codex`
 
 ### At each approval gate
 
-After Claude addresses Codex's findings, you choose:
+After the current review round is addressed, you choose:
 
 | Choice | What happens |
 |--------|-------------|
@@ -51,6 +58,19 @@ After Claude addresses Codex's findings, you choose:
 | **repeat** | Re-run Codex review (another round) |
 | **add-phase** | Insert a custom phase (e.g., "test coverage") |
 | **done** | Finish the loop early |
+
+Use `.claude/codex-review-loop/decisions.tsv` at any time to inspect and select changes:
+- `outcome=FIX` means agreed to fix
+- `outcome=NO-CHANGE` means agreed not to change
+- Set `selected=yes` for items you want applied
+
+### Check loop status
+
+```
+/codex-review-loop:status
+```
+
+Shows a visual status box with the current phase, substep, round, and finding/decision counts.
 
 ### Cancel a loop
 
@@ -69,10 +89,10 @@ Claude works on phase
    [Claude stops]
         │
         v
-Stop hook runs Codex ──→ Review file created
+Stop hook routes phase ──→ worker/reviewer run by role
         │
         v
-Claude responds to every finding
+Claude addresses review output
         │
         v
    [Claude stops]
@@ -81,14 +101,15 @@ Claude responds to every finding
 Hook presents to user ──→ approve / repeat / add-phase / done
 ```
 
-The stop hook is a generic state machine that operates on phase index + substep. It doesn't know phase names — so any number of phases work with zero code changes.
+The stop hook is a generic state machine using phase index + substep + role fields. It doesn't depend on fixed phase names.
 
 ## Configuration
 
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
-| `CODEX_REVIEW_LOOP_MODEL` | `gpt-5.2-codex` | Codex model for reviews |
-| `CODEX_REVIEW_LOOP_FLAGS` | `--sandbox read-only` | Codex sandbox flags |
+| `CODEX_REVIEW_LOOP_MODEL` | `gpt-5.2-codex` | Codex model for worker/reviewer runs |
+| `CODEX_REVIEW_LOOP_FLAGS` | `--sandbox read-only` | Flags for Codex reviewer runs |
+| `CODEX_WORKER_FLAGS` | `--sandbox=workspace-write` | Flags for Codex worker runs |
 
 ## Artifacts
 
@@ -96,12 +117,14 @@ During a session, artifacts are stored in `.claude/codex-review-loop/`:
 
 ```
 .claude/codex-review-loop/
-├── plan.md                    # The implementation plan
-├── plan-review-r1.md          # Codex review of the plan
-├── plan-findings-r1.md        # Claude's responses to findings
-├── implement-review-r1.md     # Codex review of implementation
-├── implement-findings-r1.md   # Claude's responses
-└── ...                        # Any custom phase artifacts
+├── decisions.tsv              # Canonical issue decision ledger (fix/no-change/open + selected)
+├── plan.md                    # Plan phase artifact
+├── plan-review-r1.md          # Review output for plan round 1
+├── plan-findings-r1.md        # Findings responses (for Codex-reviewed rounds)
+├── implement.md               # Implementation phase summary artifact (if produced)
+├── implement-review-r1.md     # Review output for implementation round 1
+├── implement-findings-r1.md   # Findings responses (for Codex-reviewed rounds)
+└── ...                        # Custom phase artifacts by safe artifact key
 ```
 
 Artifacts are preserved after the loop completes.
