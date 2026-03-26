@@ -1,90 +1,246 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
   <title id="title">codex-review demo</title>
-  <desc id="desc">Animated overview of the plan review and implementation review loop.</desc>
+  <desc id="desc">Animated terminal showing the real codex-review plan and implementation workflow.</desc>
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f4efe6"/>
-      <stop offset="100%" stop-color="#e5ddd0"/>
+    <linearGradient id="termBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1b26"/>
+      <stop offset="100%" stop-color="#13141c"/>
     </linearGradient>
-    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1f1f1f"/>
-      <stop offset="100%" stop-color="#0d0d0d"/>
+    <linearGradient id="titleBar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a2b3d"/>
+      <stop offset="100%" stop-color="#1e1f2e"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.18"/>
-    </filter>
+    <clipPath id="termClip"><rect x="0" y="40" width="960" height="600" rx="0"/></clipPath>
     <style>
-      .title { font: 700 58px Georgia, serif; fill: #171717; }
-      .subtitle { font: 400 22px Georgia, serif; fill: #424242; }
-      .term-title { font: 700 18px Menlo, Consolas, monospace; fill: #f2efe9; }
-      .term { font: 500 22px Menlo, Consolas, monospace; fill: #f2efe9; }
-      .term-dim { font: 500 20px Menlo, Consolas, monospace; fill: #b8b0a4; }
-      .good { fill: #b7f18a; }
-      .warn { fill: #ffd978; }
-      .accent { fill: #e35d38; }
-      .label { font: 700 16px Menlo, Consolas, monospace; letter-spacing: 0.08em; fill: #6b665f; }
-      .chip { font: 700 14px Menlo, Consolas, monospace; fill: #171717; }
-      .pulse { opacity: 0; animation: pulse 8s linear infinite; }
-      .pulse2 { opacity: 0; animation: pulse 8s linear infinite 2.2s; }
-      .pulse3 { opacity: 0; animation: pulse 8s linear infinite 4.4s; }
-      .blink { animation: blink 1s steps(2, start) infinite; }
-      @keyframes pulse {
-        0% { opacity: 0; transform: translateY(10px); }
-        8% { opacity: 1; transform: translateY(0); }
-        28% { opacity: 1; transform: translateY(0); }
-        36% { opacity: 0; transform: translateY(-6px); }
-        100% { opacity: 0; }
+      .m    { font: 500 12px 'SF Mono', Menlo, Consolas, monospace; }
+      .mb   { font: 700 12px 'SF Mono', Menlo, Consolas, monospace; }
+      .bar  { font: 600 12px -apple-system, 'Segoe UI', sans-serif; }
+      .fg   { fill: #a9b1d6; }
+      .dim  { fill: #565f89; }
+      .blue { fill: #7aa2f7; }
+      .grn  { fill: #9ece6a; }
+      .yel  { fill: #e0af68; }
+      .ora  { fill: #ff9e64; }
+      .whi  { fill: #c0caf5; }
+      .pur  { fill: #bb9af7; }
+      .btxt { fill: #7982a9; }
+
+      .tbl-line { stroke: #3b3d57; stroke-width: 1; fill: none; }
+      .tbl-fill { fill: #1e2030; }
+
+      /* 34s loop. S1: 0-17s  S2: 17-34s */
+      .sc1 { opacity:0; animation: sc1 34s linear infinite }
+      .sc2 { opacity:0; animation: sc2 34s linear infinite }
+      @keyframes sc1 {
+        0%{opacity:0} 1%{opacity:1} 47%{opacity:1} 50%{opacity:0} 100%{opacity:0}
       }
-      @keyframes blink {
-        0%, 49% { opacity: 1; }
-        50%, 100% { opacity: 0; }
+      @keyframes sc2 {
+        0%{opacity:0} 50%{opacity:0} 51.5%{opacity:1} 97%{opacity:1} 100%{opacity:0}
       }
+
+      .cursor { animation: blink 1s steps(1) infinite }
+      @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+      @keyframes fadeIn {
+        from { opacity:0; transform:translateY(4px) }
+        to   { opacity:1; transform:translateY(0) }
+      }
+
+      .a1  { opacity:0; animation: fadeIn .3s ease-out 0.5s both }
+      .a2  { opacity:0; animation: fadeIn .3s ease-out 1.4s both }
+      .a3  { opacity:0; animation: fadeIn .2s ease-out 1.8s both }
+      .a4  { opacity:0; animation: fadeIn .3s ease-out 2.2s both }
+      .a5  { opacity:0; animation: fadeIn .3s ease-out 3.6s both }
+      .a6  { opacity:0; animation: fadeIn .3s ease-out 4.4s both }
+      .a7  { opacity:0; animation: fadeIn .2s ease-out 4.8s both }
+      .a8  { opacity:0; animation: fadeIn .2s ease-out 5.1s both }
+      .a9  { opacity:0; animation: fadeIn .2s ease-out 5.4s both }
+      .a10 { opacity:0; animation: fadeIn .2s ease-out 5.7s both }
+      .a11 { opacity:0; animation: fadeIn .2s ease-out 6.0s both }
+      .a12 { opacity:0; animation: fadeIn .3s ease-out 6.8s both }
+      .a13 { opacity:0; animation: fadeIn .3s ease-out 7.6s both }
+      .a14 { opacity:0; animation: fadeIn .2s ease-out 8.2s both }
+      .a15 { opacity:0; animation: fadeIn .2s ease-out 8.6s both }
+      .a16 { opacity:0; animation: fadeIn .2s ease-out 9.0s both }
+      .a17 { opacity:0; animation: fadeIn .2s ease-out 9.4s both }
+      .a18 { opacity:0; animation: fadeIn .2s ease-out 9.8s both }
+      .a19 { opacity:0; animation: fadeIn .3s ease-out 10.8s both }
+      .a20 { opacity:0; animation: fadeIn .2s ease-out 11.2s both }
+      .a21 { opacity:0; animation: fadeIn .2s ease-out 11.5s both }
+      .a22 { opacity:0; animation: fadeIn .2s ease-out 11.8s both }
+
+      .b1  { opacity:0; animation: fadeIn .3s ease-out 17.5s both }
+      .b2  { opacity:0; animation: fadeIn .3s ease-out 18.4s both }
+      .b3  { opacity:0; animation: fadeIn .2s ease-out 18.8s both }
+      .b4  { opacity:0; animation: fadeIn .3s ease-out 19.2s both }
+      .b5  { opacity:0; animation: fadeIn .3s ease-out 20.6s both }
+      .b6  { opacity:0; animation: fadeIn .3s ease-out 21.4s both }
+      .b7  { opacity:0; animation: fadeIn .2s ease-out 21.8s both }
+      .b8  { opacity:0; animation: fadeIn .2s ease-out 22.1s both }
+      .b9  { opacity:0; animation: fadeIn .3s ease-out 23.0s both }
+      .b10 { opacity:0; animation: fadeIn .3s ease-out 24.0s both }
+      .b11 { opacity:0; animation: fadeIn .2s ease-out 24.6s both }
+      .b12 { opacity:0; animation: fadeIn .2s ease-out 25.0s both }
+      .b13 { opacity:0; animation: fadeIn .3s ease-out 26.0s both }
+      .b14 { opacity:0; animation: fadeIn .2s ease-out 26.4s both }
+      .b15 { opacity:0; animation: fadeIn .2s ease-out 26.7s both }
+      .b16 { opacity:0; animation: fadeIn .3s ease-out 27.6s both }
     </style>
   </defs>
 
-  <rect width="1200" height="720" fill="url(#bg)"/>
-  <circle cx="1030" cy="110" r="150" fill="#d7cfbf" opacity="0.45"/>
-  <circle cx="130" cy="640" r="190" fill="#d1c7b5" opacity="0.35"/>
+  <!-- terminal chrome -->
+  <rect width="960" height="640" rx="12" fill="url(#termBg)"/>
+  <rect width="960" height="40" rx="12" fill="url(#titleBar)"/>
+  <rect y="28" width="960" height="12" fill="url(#titleBar)"/>
+  <circle cx="20" cy="20" r="6" fill="#ff5f57"/>
+  <circle cx="40" cy="20" r="6" fill="#febc2e"/>
+  <circle cx="60" cy="20" r="6" fill="#28c840"/>
+  <text x="480" y="25" text-anchor="middle" class="bar btxt">codex-review — Claude Code</text>
 
-  <text x="72" y="92" class="label">COMMAND-DRIVEN REVIEW LOOPS</text>
-  <text x="72" y="150" class="title">Review the plan. Review the code.</text>
-  <text x="72" y="188" class="subtitle">Keep the approved plan sticky, keep findings on disk, keep sessions isolated.</text>
+  <!-- ═══ SCENE 1: /codex-review:plan ═══ -->
+  <g class="sc1" clip-path="url(#termClip)">
+    <text y="64" class="m a1">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="dim"> Bash(</tspan><tspan class="fg">/codex-review:plan</tspan><tspan class="dim">)</tspan>
+    </text>
 
-  <g transform="translate(72,248)" filter="url(#shadow)">
-    <rect x="0" y="0" rx="24" ry="24" width="486" height="360" fill="url(#panel)"/>
-    <text x="28" y="40" class="term-title">PLAN ROUND</text>
-    <rect x="28" y="62" width="430" height="2" fill="#2b2b2b"/>
-    <text x="28" y="108" class="term">$ /codex-review:plan deeply review this plan</text>
-    <text x="28" y="160" class="term pulse">Created workflow 20260324-211108-81075e</text>
-    <text x="28" y="202" class="term pulse">Review file: artifacts/plan-review-r1.md</text>
-    <text x="28" y="244" class="term pulse2">HIGH-1 FIX  Add rollback check</text>
-    <text x="28" y="286" class="term pulse2">MEDIUM-1 NO-CHANGE Keep current scope</text>
-    <text x="28" y="328" class="term pulse3">1. Move to implementation</text>
-    <text x="28" y="356" class="term pulse3">2. Run another review round</text>
-    <text x="28" y="384" class="term pulse3">3. Stop and keep this review</text>
-    <text x="430" y="108" class="term accent blink">_</text>
+    <text x="28" y="84" class="m fg a2">Created workflow 20260326-214833-842c12.</text>
+    <text x="28" y="100" class="m dim a3">Review file: artifacts/plan-review-r1.md</text>
+    <text x="28" y="114" class="m fg a4">Running Codex review...</text>
+    <text x="28" y="130" class="m grn a5">Codex review completed for this round.</text>
+
+    <!-- findings write -->
+    <text y="152" class="m a6">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="dim"> Write(</tspan><tspan class="fg">plan-findings-r1.md</tspan><tspan class="dim">)</tspan>
+    </text>
+    <text x="28" y="170" class="m a7"><tspan class="ora">[HIGH-1]</tspan><tspan class="grn"> ACCEPT</tspan><tspan class="dim"> — Add async close() to both classes</tspan></text>
+    <text x="28" y="186" class="m a8"><tspan class="ora">[HIGH-2]</tspan><tspan class="grn"> ACCEPT</tspan><tspan class="dim"> — Audit all 15+ patch sites in tests</tspan></text>
+    <text x="28" y="202" class="m a9"><tspan class="yel">[MEDIUM-1]</tspan><tspan class="grn"> ACCEPT</tspan><tspan class="dim"> — Share single httpx client</tspan></text>
+    <text x="28" y="218" class="m a10"><tspan class="yel">[MEDIUM-2]</tspan><tspan class="grn"> ACCEPT</tspan><tspan class="dim"> — Add aclose() + lifespan shutdown</tspan></text>
+    <text x="28" y="234" class="m a11"><tspan class="yel">[MEDIUM-3]</tspan><tspan class="grn"> ACCEPT</tspan><tspan class="dim"> — Reset fixture for test isolation</tspan></text>
+
+    <!-- summary -->
+    <text y="258" class="m a12">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="mb whi"> Review Summary</tspan>
+      <tspan class="dim"> — 5 findings, all accepted:</tspan>
+    </text>
+
+    <!-- TABLE drawn with rects for clean borders -->
+    <!-- col widths: severity=80, finding=310, action=260.  Total=650 -->
+    <!-- Table: x=28, y=274 -->
+    <g class="a13">
+      <!-- table background -->
+      <rect x="28" y="274" width="660" height="166" rx="4" class="tbl-fill"/>
+      <!-- outer border -->
+      <rect x="28" y="274" width="660" height="166" rx="4" class="tbl-line"/>
+      <!-- header separator -->
+      <line x1="28" y1="296" x2="688" y2="296" class="tbl-line"/>
+      <!-- column separators -->
+      <line x1="112" y1="274" x2="112" y2="440" class="tbl-line"/>
+      <line x1="428" y1="274" x2="428" y2="440" class="tbl-line"/>
+      <!-- row separators -->
+      <line x1="28" y1="318" x2="688" y2="318" class="tbl-line" stroke-dasharray="2,2"/>
+      <line x1="28" y1="340" x2="688" y2="340" class="tbl-line" stroke-dasharray="2,2"/>
+      <line x1="28" y1="362" x2="688" y2="362" class="tbl-line" stroke-dasharray="2,2"/>
+      <line x1="28" y1="384" x2="688" y2="384" class="tbl-line" stroke-dasharray="2,2"/>
+      <line x1="28" y1="406" x2="688" y2="406" class="tbl-line" stroke-dasharray="2,2"/>
+
+      <!-- header -->
+      <text x="40"  y="289" class="mb fg">Severity</text>
+      <text x="124" y="289" class="mb fg">Finding</text>
+      <text x="440" y="289" class="mb fg">Action</text>
+
+      <!-- row 1 -->
+      <text x="40"  y="311" class="m ora">HIGH</text>
+      <text x="124" y="311" class="m fg">Explicit close needed on shutdown</text>
+      <text x="440" y="311" class="m dim">Wire into FastAPI lifespan</text>
+      <!-- row 2 -->
+      <text x="40"  y="333" class="m ora">HIGH</text>
+      <text x="124" y="333" class="m fg">15+ test patches need updating</text>
+      <text x="440" y="333" class="m dim">Full test migration</text>
+      <!-- row 3 -->
+      <text x="40"  y="355" class="m yel">MEDIUM</text>
+      <text x="124" y="355" class="m fg">Share one httpx client across classes</text>
+      <text x="440" y="355" class="m dim">Constructor injection</text>
+      <!-- row 4 -->
+      <text x="40"  y="377" class="m yel">MEDIUM</text>
+      <text x="124" y="377" class="m fg">Add aclose() + singleton reset</text>
+      <text x="440" y="377" class="m dim">Lifecycle methods</text>
+      <!-- row 5 -->
+      <text x="40"  y="399" class="m yel">MEDIUM</text>
+      <text x="124" y="399" class="m fg">Test contamination from singleton</text>
+      <text x="440" y="399" class="m dim">Reset fixture</text>
+    </g>
+
+    <!-- choice -->
+    <text x="28" y="468" class="m fg a19">What would you like to do?</text>
+    <text x="28" y="486" class="m a20"><tspan class="grn">1.</tspan><tspan class="fg"> Move to implementation</tspan></text>
+    <text x="28" y="502" class="m a21"><tspan class="dim">2. Run another review round</tspan></text>
+    <text x="28" y="518" class="m a22"><tspan class="dim">3. Stop and keep this review</tspan></text>
   </g>
 
-  <g transform="translate(612,248)" filter="url(#shadow)">
-    <rect x="0" y="0" rx="24" ry="24" width="516" height="360" fill="url(#panel)"/>
-    <text x="28" y="40" class="term-title">IMPLEMENTATION ROUND</text>
-    <rect x="28" y="62" width="460" height="2" fill="#2b2b2b"/>
-    <text x="28" y="108" class="term">$ /codex-review:impl review the implementation</text>
-    <text x="28" y="160" class="term pulse">Approved workflow plan round</text>
-    <text x="28" y="202" class="term pulse">Phase advanced to implement (round 1)</text>
-    <text x="28" y="244" class="term pulse2">Review compares against artifacts/plan.md</text>
-    <text x="28" y="286" class="term pulse2 good">FIX  stale session fallback removed</text>
-    <text x="28" y="328" class="term pulse3">Summary: 2 total, 1 fix, 1 no-change</text>
-    <text x="28" y="370" class="term pulse3">Artifacts preserved under workflow history</text>
-    <text x="460" y="108" class="term accent blink">_</text>
+  <!-- ═══ SCENE 2: /codex-review:impl ═══ -->
+  <g class="sc2" clip-path="url(#termClip)">
+    <text x="20" y="64" class="m grn b1">Approved plan round. Phase advanced to implement (round 1).</text>
+
+    <text y="88" class="m b2">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="dim"> Bash(</tspan><tspan class="fg">/codex-review:impl</tspan><tspan class="dim">)</tspan>
+    </text>
+    <text x="28" y="108" class="m dim b3">Review file: artifacts/implement-review-r1.md</text>
+    <text x="28" y="124" class="m fg b4">Running Codex review...</text>
+    <text x="28" y="140" class="m grn b5">Codex review completed for this round.</text>
+
+    <!-- findings write -->
+    <text y="164" class="m b6">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="dim"> Write(</tspan><tspan class="fg">implement-findings-r1.md</tspan><tspan class="dim">)</tspan>
+    </text>
+    <text x="28" y="184" class="m b7"><tspan class="ora">[HIGH-1]</tspan><tspan class="grn"> FIX</tspan><tspan class="dim"> — Added guard in resolver</tspan></text>
+    <text x="28" y="200" class="m b8"><tspan class="yel">[MEDIUM-1]</tspan><tspan class="fg"> WONTFIX</tspan><tspan class="dim"> — Lock tested via integration</tspan></text>
+
+    <!-- summary table -->
+    <text y="226" class="m b9">
+      <tspan x="20" class="pur">⏺</tspan>
+      <tspan class="mb whi"> Implementation Summary</tspan>
+      <tspan class="dim"> — 2 findings:</tspan>
+    </text>
+
+    <!-- TABLE: 2 rows -->
+    <g class="b10">
+      <rect x="28" y="242" width="660" height="100" rx="4" class="tbl-fill"/>
+      <rect x="28" y="242" width="660" height="100" rx="4" class="tbl-line"/>
+      <line x1="28" y1="264" x2="688" y2="264" class="tbl-line"/>
+      <line x1="112" y1="242" x2="112" y2="342" class="tbl-line"/>
+      <line x1="428" y1="242" x2="428" y2="342" class="tbl-line"/>
+      <line x1="28" y1="286" x2="688" y2="286" class="tbl-line" stroke-dasharray="2,2"/>
+      <line x1="28" y1="308" x2="688" y2="308" class="tbl-line" stroke-dasharray="2,2"/>
+
+      <text x="40"  y="257" class="mb fg">Severity</text>
+      <text x="124" y="257" class="mb fg">Finding</text>
+      <text x="440" y="257" class="mb fg">Decision</text>
+
+      <text x="40"  y="279" class="m ora">HIGH</text>
+      <text x="124" y="279" class="m fg">Missing nil check in resolver</text>
+      <text x="440" y="279" class="m grn">FIX</text>
+
+      <text x="40"  y="301" class="m yel">MEDIUM</text>
+      <text x="124" y="301" class="m fg">Stale lock cleanup not tested</text>
+      <text x="440" y="301" class="m fg">WONTFIX</text>
+    </g>
+
+    <!-- choice -->
+    <text x="28" y="370" class="m fg b11">What would you like to do?</text>
+    <text x="28" y="388" class="m b12"><tspan class="grn">1.</tspan><tspan class="fg"> Finish the workflow</tspan></text>
+    <text x="28" y="404" class="m b12"><tspan class="dim">2. Run another implementation review round</tspan></text>
+
+    <!-- completion -->
+    <text x="20" y="432" class="m grn b13">Approved implementation round. Workflow completed.</text>
+    <text x="20" y="450" class="m dim b14">All artifacts preserved.</text>
+    <text x="28" y="470" class="m dim b15">plan.md  plan-review-r1.md  plan-findings-r1.md</text>
+    <text x="28" y="486" class="m dim b16">implement-review-r1.md  implement-findings-r1.md  decisions.tsv</text>
   </g>
 
-  <g transform="translate(92,632)">
-    <rect x="0" y="-24" rx="999" ry="999" width="140" height="34" fill="#e35d38"/>
-    <text x="19" y="-2" class="chip">sticky plan</text>
-    <rect x="156" y="-24" rx="999" ry="999" width="168" height="34" fill="#ffd978"/>
-    <text x="176" y="-2" class="chip">session owned</text>
-    <rect x="342" y="-24" rx="999" ry="999" width="176" height="34" fill="#b7f18a"/>
-    <text x="362" y="-2" class="chip">round history</text>
-  </g>
+  <rect x="932" y="598" width="8" height="15" rx="1" fill="#7aa2f7" class="cursor"/>
 </svg>
