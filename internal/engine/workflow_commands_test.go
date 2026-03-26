@@ -50,7 +50,7 @@ exit 1
 
 	var out strings.Builder
 	cfg := config.Config{CodexModel: "test-model", CallTimeoutSec: 10}
-	code, err := RunPlanReview(cfg, &out, PlanReviewOptions{Prompt: "deeply review this plan"})
+	code, err := RunPlanReview(cfg, &out, PlanReviewOptions{PlanPath: planPath, Prompt: "deeply review this plan"})
 	if err != nil {
 		t.Fatalf("RunPlanReview: %v", err)
 	}
