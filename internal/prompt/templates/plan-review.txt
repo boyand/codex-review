@@ -21,6 +21,9 @@ Evaluate this plan against the following criteria:
 5. **Feasibility**: Can this plan be implemented as described? Are there implicit assumptions or dependencies?
 6. **Security**: Are there security concerns? Input validation gaps? Authentication/authorization issues?
 
+If git tooling is unavailable or this is not a git repository, do **not** skip review.
+Review the provided plan content directly and still produce a full structured review.
+
 ## Output Format
 
 Write your review as structured markdown. For each finding, use a severity tag:

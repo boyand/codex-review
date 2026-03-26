@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boyand/codex-review-loop/internal/config"
-	"github.com/boyand/codex-review-loop/internal/phase"
+	"github.com/boyand/codex-review/internal/config"
+	"github.com/boyand/codex-review/internal/phase"
 )
 
 // Result holds the outcome of a codex execution.
@@ -33,6 +33,30 @@ func RequireCodexCLI() error {
 // CodexExec runs a codex exec command with timeout and log capture.
 // Returns nil error on success, or an error with details on failure.
 func CodexExec(cfg config.Config, prompt, outputFile string, flags []string, artifactsDir string) (*Result, error) {
+	result, err := codexExecOnce(cfg, prompt, outputFile, flags, artifactsDir)
+	if err == nil {
+		return result, nil
+	}
+
+	// Codex CLI may require trusted-directory checks in some environments.
+	// Retry once with --skip-git-repo-check when that is the only blocker.
+	if shouldRetryWithSkipGitCheck(result, flags) {
+		retryFlags := append([]string{}, flags...)
+		retryFlags = append(retryFlags, "--skip-git-repo-check")
+		retryResult, retryErr := codexExecOnce(cfg, prompt, outputFile, retryFlags, artifactsDir)
+		if retryErr == nil {
+			if result != nil && result.LogPath != "" {
+				_ = os.Remove(result.LogPath)
+			}
+			return retryResult, nil
+		}
+		return retryResult, retryErr
+	}
+
+	return result, err
+}
+
+func codexExecOnce(cfg config.Config, prompt, outputFile string, flags []string, artifactsDir string) (*Result, error) {
 	logFile, err := os.CreateTemp(artifactsDir, "codex-exec.*.log")
 	if err != nil {
 		return nil, fmt.Errorf("create log file: %w", err)
@@ -77,6 +101,30 @@ func CodexExec(cfg config.Config, prompt, outputFile string, flags []string, art
 	return result, nil
 }
 
+func shouldRetryWithSkipGitCheck(result *Result, flags []string) bool {
+	if result == nil {
+		return false
+	}
+	if hasFlag(flags, "--skip-git-repo-check") {
+		return false
+	}
+	msg := strings.ToLower(strings.TrimSpace(result.LastErrorLine))
+	if msg == "" {
+		return false
+	}
+	return strings.Contains(msg, "not inside a trusted directory") &&
+		strings.Contains(msg, "--skip-git-repo-check")
+}
+
+func hasFlag(flags []string, target string) bool {
+	for _, f := range flags {
+		if strings.TrimSpace(f) == target {
+			return true
+		}
+	}
+	return false
+}
+
 // ReviewValidator checks whether review output content is valid.
 type ReviewValidator func(content string) bool
 
@@ -90,7 +138,7 @@ func RunCodexReview(cfg config.Config, prompt, strictSuffix, reviewFile string, 
 		p := prompt
 		if attempt == 2 {
 			p = prompt + strictSuffix
-			fmt.Fprintln(os.Stderr, "codex-review-loop: First review output was malformed; retrying with strict format enforcement...")
+			fmt.Fprintln(os.Stderr, "codex-review: First review output was malformed; retrying with strict format enforcement...")
 		}
 
 		result, err := CodexExec(cfg, p, reviewFile, flags, artifactsDir)
@@ -124,7 +172,7 @@ func RunCodexReview(cfg config.Config, prompt, strictSuffix, reviewFile string, 
 
 // RunCodexWorker runs a codex worker phase.
 func RunCodexWorker(cfg config.Config, prompt, outputFile string, flags []string, artifactsDir string) (*Result, error) {
-	fmt.Fprintf(os.Stderr, "codex-review-loop: Running Codex worker...\n")
+	fmt.Fprintf(os.Stderr, "codex-review: Running Codex worker...\n")
 	return CodexExec(cfg, prompt, outputFile, flags, artifactsDir)
 }
 

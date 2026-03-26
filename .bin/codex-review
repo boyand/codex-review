@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+WORKFLOWS_DIR=".claude/codex-review/workflows"
+TMP_BASE="${TMPDIR:-/tmp}/codex-review"
+EXPECTED_VERSION="0.7.3"
+
+binary_path() {
+    if [[ -d "$PLUGIN_ROOT/.git" ]]; then
+        printf '%s\n' "$PLUGIN_ROOT/.bin/codex-review-go"
+        return 0
+    fi
+
+    local root_key
+    root_key="$(printf '%s' "$PLUGIN_ROOT" | cksum | awk '{print $1}')"
+    printf '%s/bin/%s/%s/codex-review-go\n' "$TMP_BASE" "$EXPECTED_VERSION" "$root_key"
+}
+
+find_loop_root() {
+    local dir="$PWD"
+    while true; do
+        if [[ -d "$dir/$WORKFLOWS_DIR" ]]; then
+            printf '%s\n' "$dir"
+            return 0
+        fi
+        if [[ "$dir" == "/" ]]; then
+            return 1
+        fi
+        dir="$(dirname "$dir")"
+    done
+}
+
+read_session_id() {
+    local session_file="$1"
+    local session_id
+    session_id="$(grep -ao '"sessionId":"[^"]*"' "$session_file" 2>/dev/null | head -n 1 | cut -d'"' -f4 || true)"
+    if [[ "$session_id" =~ ^[0-9a-fA-F-]{36}$ ]]; then
+        printf '%s\n' "$session_id"
+    fi
+}
+
+parent_pid() {
+    local pid="$1"
+    ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' '
+}
+
+resolve_session_hints() {
+    local pid="${PPID:-}"
+    local depth=0
+    while [[ -n "$pid" && "$pid" =~ ^[0-9]+$ && "$pid" -gt 1 && "$depth" -lt 8 ]]; do
+        local session_file="$HOME/.claude/sessions/${pid}.json"
+        if [[ -f "$session_file" ]]; then
+            local session_id
+            session_id="$(read_session_id "$session_file")"
+            if [[ -n "$session_id" ]]; then
+                printf '%s %s\n' "$pid" "$session_id"
+                return 0
+            fi
+        fi
+        pid="$(parent_pid "$pid")"
+        depth=$((depth + 1))
+    done
+    return 1
+}
+
+prepare_go_env() {
+    export GOCACHE="${GOCACHE:-$TMP_BASE/gocache}"
+    export GOMODCACHE="${GOMODCACHE:-$TMP_BASE/gomodcache}"
+    export GOPATH="${GOPATH:-$TMP_BASE/gopath}"
+    mkdir -p "$GOCACHE" "$GOMODCACHE" "$GOPATH" "$TMP_BASE/bin"
+}
+
+ensure_binary() {
+    if ! command -v go >/dev/null 2>&1; then
+        echo "codex-review: Go toolchain required but 'go' not found on PATH. Install Go from https://go.dev/dl/"
+        return 1
+    fi
+
+    prepare_go_env
+
+    local bin_go
+    bin_go="$(binary_path)"
+
+    local needs_rebuild="false"
+    if [[ ! -x "$bin_go" ]]; then
+        needs_rebuild="true"
+    elif [[ "$("$bin_go" --version 2>/dev/null | awk '{print $2}')" != "$EXPECTED_VERSION" ]]; then
+        needs_rebuild="true"
+    elif [[ -n $(find "$PLUGIN_ROOT/cmd" "$PLUGIN_ROOT/internal" -name '*.go' -newer "$bin_go" 2>/dev/null | head -1) ]]; then
+        needs_rebuild="true"
+    fi
+
+    if [[ "$needs_rebuild" == "true" ]]; then
+        mkdir -p "$(dirname "$bin_go")"
+        if ! (cd "$PLUGIN_ROOT" && go build -o "$bin_go" ./cmd/codex-review); then
+            echo "codex-review: Go build failed. Fix compilation errors and retry."
+            return 1
+        fi
+    fi
+
+    BIN_GO="$bin_go"
+}
+
+run_from_loop_root() {
+    if loop_root="$(find_loop_root)"; then
+        cd "$loop_root"
+    fi
+
+    local session_hints
+    if session_hints="$(resolve_session_hints)"; then
+        local session_pid="${session_hints%% *}"
+        local session_id="${session_hints#* }"
+        exec "$BIN_GO" --session-pid "$session_pid" --session-id "$session_id" "$@"
+    fi
+    exec "$BIN_GO" "$@"
+}
+
+if ! ensure_binary; then
+    exit 1
+fi
+run_from_loop_root "$@"

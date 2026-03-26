@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boyand/codex-review-loop/internal/fsx"
-	"github.com/boyand/codex-review-loop/internal/textutil"
+	"github.com/boyand/codex-review/internal/fsx"
+	"github.com/boyand/codex-review/internal/textutil"
 )
 
-const header = `# Codex Review Loop Decisions Ledger
+const header = `# Codex Review Decisions Ledger
 # Edit ` + "`selected`" + ` to ` + "`yes`" + ` for fixes you want applied.
 # phase	artifact	round	reviewer	finding_id	severity	finding	decision	outcome	selected	status	updated_at
 `
@@ -51,7 +51,7 @@ type RoundCounts struct {
 	CritTotal, CritFix, CritReject, CritOpen int
 	HighTotal, HighFix, HighReject, HighOpen int
 	MedTotal, MedFix, MedReject, MedOpen     int
-	LowTotal, LowFix, LowReject, LowOpen    int
+	LowTotal, LowFix, LowReject, LowOpen     int
 }
 
 // Ledger manages the decisions TSV.
@@ -236,6 +236,33 @@ func (l *Ledger) RowsForPhaseRound(phase string, round int) []Row {
 	return out
 }
 
+// RowsForPhaseRoundOutcome returns rows for a phase/round filtered by outcome token.
+func (l *Ledger) RowsForPhaseRoundOutcome(phase string, round int, outcome string) []Row {
+	roundStr := strconv.Itoa(round)
+	outcome = strings.ToUpper(strings.TrimSpace(outcome))
+	var out []Row
+	for _, r := range l.rows {
+		if r.Phase != phase || r.Round != roundStr {
+			continue
+		}
+		if strings.ToUpper(strings.TrimSpace(r.Outcome)) == outcome {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// CountSelected returns how many rows in the slice have selected=yes.
+func CountSelected(rows []Row) int {
+	total := 0
+	for _, r := range rows {
+		if strings.EqualFold(strings.TrimSpace(r.Selected), "yes") {
+			total++
+		}
+	}
+	return total
+}
+
 func countRow(c *Counts, r Row) {
 	sev := strings.ToUpper(r.Severity)
 	switch sev {
@@ -394,4 +421,3 @@ var sanitizeReplacer = strings.NewReplacer("\t", " ", "\r", " ", "\n", " ")
 func Sanitize(s string) string {
 	return strings.Join(strings.Fields(sanitizeReplacer.Replace(s)), " ")
 }
-

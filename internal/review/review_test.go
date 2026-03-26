@@ -38,6 +38,21 @@ func TestIsValid(t *testing.T) {
 			"No findings.\nCritical: 0\nHigh: 0",
 			false,
 		},
+		{
+			"skipped due missing git repo",
+			"Codex review of the plan was skipped due to the missing git repo.",
+			false,
+		},
+		{
+			"no findings but skipped wording",
+			"No findings.\n- Critical: 0\n- High: 0\n- Medium: 0\n- Low: 0\nReview was skipped due to missing git repo.",
+			false,
+		},
+		{
+			"timeout fallback note with findings",
+			"## Implementation Review\n\n_Note: Codex review session timed out before producing final output (round 3). Findings extracted from Codex analysis log._\n\n[HIGH-1] Some issue",
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/boyand/codex-review-loop/internal/config"
+	"github.com/boyand/codex-review/internal/config"
 )
 
 func TestParseFlags(t *testing.T) {
@@ -200,5 +200,62 @@ func TestRunCodexReviewExecFailureNoRetry(t *testing.T) {
 	_, err := RunCodexReview(cfg, "prompt", "\nStrict!", reviewFile, nil, artifactsDir, nil)
 	if err == nil {
 		t.Fatal("expected error for exec failure")
+	}
+}
+
+func TestCodexExecRetriesTrustedDirectoryErrorWithSkipGitFlag(t *testing.T) {
+	artifactsDir := t.TempDir()
+	outputFile := filepath.Join(artifactsDir, "output.md")
+	counterFile := filepath.Join(artifactsDir, "count")
+	if err := os.WriteFile(counterFile, []byte("0"), 0644); err != nil {
+		t.Fatalf("write counter: %v", err)
+	}
+
+	setupFakeCodex(t, `
+COUNTER_FILE="`+counterFile+`"
+COUNT=$(cat "$COUNTER_FILE")
+HAS_SKIP=0
+for i in "$@"; do
+    if [ "$i" = "--skip-git-repo-check" ]; then
+        HAS_SKIP=1
+    fi
+    if [ "$prev" = "--output-last-message" ]; then
+        OUTPUT_FILE="$i"
+    fi
+    prev="$i"
+done
+
+if [ "$HAS_SKIP" = "1" ]; then
+    echo "[HIGH-1] Trusted dir bypassed" > "$OUTPUT_FILE"
+    echo "2" > "$COUNTER_FILE"
+    exit 0
+fi
+
+echo "Not inside a trusted directory and --skip-git-repo-check was not specified." >&2
+echo "1" > "$COUNTER_FILE"
+exit 1
+`)
+
+	cfg := config.Config{CodexModel: "test-model", CallTimeoutSec: 10}
+	result, err := CodexExec(cfg, "test prompt", outputFile, []string{"--sandbox=read-only"}, artifactsDir)
+	if err != nil {
+		t.Fatalf("CodexExec: %v", err)
+	}
+	if result.LogPath != "" {
+		t.Errorf("log should be cleaned up on success, got %q", result.LogPath)
+	}
+	data, err := os.ReadFile(outputFile)
+	if err != nil {
+		t.Fatalf("read output: %v", err)
+	}
+	if string(data) != "[HIGH-1] Trusted dir bypassed\n" {
+		t.Fatalf("output = %q", string(data))
+	}
+	count, err := os.ReadFile(counterFile)
+	if err != nil {
+		t.Fatalf("read count: %v", err)
+	}
+	if string(count) != "2\n" {
+		t.Fatalf("expected retry to run, count=%q", string(count))
 	}
 }

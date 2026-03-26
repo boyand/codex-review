@@ -36,6 +36,16 @@ func TestBuildReviewPromptImplement(t *testing.T) {
 	}
 }
 
+func TestBuildReviewPromptPlanWithCustomFocus(t *testing.T) {
+	prompt := BuildReviewPrompt("plan", "Build auth", "# My Plan", "", "Focus on edge cases")
+	if !strings.Contains(prompt, "Additional Review Focus") {
+		t.Error("missing additional review focus section")
+	}
+	if !strings.Contains(prompt, "Focus on edge cases") {
+		t.Error("missing custom focus text")
+	}
+}
+
 func TestBuildReviewPromptCustomWithPrompt(t *testing.T) {
 	prompt := BuildReviewPrompt("security-audit", "Build auth", "phase output", "ref content", "Focus on OWASP")
 	if !strings.Contains(prompt, "security-audit") {
@@ -59,33 +69,6 @@ func TestBuildReviewPromptCustomNoPrompt(t *testing.T) {
 	}
 	if !strings.Contains(prompt, "[CRITICAL-N]") {
 		t.Error("missing severity tag instructions")
-	}
-}
-
-func TestBuildWorkPromptPlan(t *testing.T) {
-	prompt := BuildWorkPrompt("plan", "Build auth", "", "")
-	if !strings.Contains(prompt, "implementation plan") {
-		t.Error("missing plan instructions")
-	}
-}
-
-func TestBuildWorkPromptImplement(t *testing.T) {
-	prompt := BuildWorkPrompt("implement", "Build auth", "# Plan Content", "")
-	if !strings.Contains(prompt, "implementing code") {
-		t.Error("missing implement instructions")
-	}
-	if !strings.Contains(prompt, "# Plan Content") {
-		t.Error("missing plan reference")
-	}
-}
-
-func TestBuildWorkPromptCustom(t *testing.T) {
-	prompt := BuildWorkPrompt("test", "Build auth", "ref", "Write unit tests")
-	if !strings.Contains(prompt, "Write unit tests") {
-		t.Error("missing work prompt")
-	}
-	if !strings.Contains(prompt, "ref") {
-		t.Error("missing reference")
 	}
 }
 

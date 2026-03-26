@@ -1,10 +1,10 @@
 {
-  "name": "codex-review-loop",
-  "version": "0.1.0",
-  "description": "N-phase review loop with OpenAI Codex. Automatic plan and implementation review with dynamic phase insertion.",
+  "name": "codex-review",
+  "version": "0.7.3",
+  "description": "Command-driven Claude/Codex review workflows for multi-round plan and implementation review.",
   "author": {
     "name": "boyand",
     "url": "https://github.com/boyand"
   },
-  "homepage": "https://github.com/boyand/codex-review-loop"
+  "homepage": "https://github.com/boyand/codex-review"
 }

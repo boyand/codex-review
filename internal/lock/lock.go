@@ -11,6 +11,16 @@ import (
 	"syscall"
 )
 
+// HeldError reports a live lock owned by another process.
+type HeldError struct {
+	OwnerPID int
+	LockDir  string
+}
+
+func (e *HeldError) Error() string {
+	return fmt.Sprintf("another codex-review command is already running (pid %d)", e.OwnerPID)
+}
+
 // Lock represents a directory-based lock.
 type Lock struct {
 	dir  string
@@ -46,7 +56,7 @@ func (l *Lock) Acquire() error {
 	// Lock dir exists — check if owner is still alive
 	ownerPID := l.readOwnerPID()
 	if ownerPID > 0 && processAlive(ownerPID) {
-		return fmt.Errorf("another codex-review-loop hook is already running (pid %d). Wait for it to finish, then stop again", ownerPID)
+		return &HeldError{OwnerPID: ownerPID, LockDir: l.dir}
 	}
 
 	// Stale lock — reclaim

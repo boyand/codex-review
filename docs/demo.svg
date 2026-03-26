@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">codex-review demo</title>
+  <desc id="desc">Animated overview of the plan review and implementation review loop.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4efe6"/>
+      <stop offset="100%" stop-color="#e5ddd0"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f1f1f"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+    <style>
+      .title { font: 700 58px Georgia, serif; fill: #171717; }
+      .subtitle { font: 400 22px Georgia, serif; fill: #424242; }
+      .term-title { font: 700 18px Menlo, Consolas, monospace; fill: #f2efe9; }
+      .term { font: 500 22px Menlo, Consolas, monospace; fill: #f2efe9; }
+      .term-dim { font: 500 20px Menlo, Consolas, monospace; fill: #b8b0a4; }
+      .good { fill: #b7f18a; }
+      .warn { fill: #ffd978; }
+      .accent { fill: #e35d38; }
+      .label { font: 700 16px Menlo, Consolas, monospace; letter-spacing: 0.08em; fill: #6b665f; }
+      .chip { font: 700 14px Menlo, Consolas, monospace; fill: #171717; }
+      .pulse { opacity: 0; animation: pulse 8s linear infinite; }
+      .pulse2 { opacity: 0; animation: pulse 8s linear infinite 2.2s; }
+      .pulse3 { opacity: 0; animation: pulse 8s linear infinite 4.4s; }
+      .blink { animation: blink 1s steps(2, start) infinite; }
+      @keyframes pulse {
+        0% { opacity: 0; transform: translateY(10px); }
+        8% { opacity: 1; transform: translateY(0); }
+        28% { opacity: 1; transform: translateY(0); }
+        36% { opacity: 0; transform: translateY(-6px); }
+        100% { opacity: 0; }
+      }
+      @keyframes blink {
+        0%, 49% { opacity: 1; }
+        50%, 100% { opacity: 0; }
+      }
+    </style>
+  </defs>
+
+  <rect width="1200" height="720" fill="url(#bg)"/>
+  <circle cx="1030" cy="110" r="150" fill="#d7cfbf" opacity="0.45"/>
+  <circle cx="130" cy="640" r="190" fill="#d1c7b5" opacity="0.35"/>
+
+  <text x="72" y="92" class="label">COMMAND-DRIVEN REVIEW LOOPS</text>
+  <text x="72" y="150" class="title">Review the plan. Review the code.</text>
+  <text x="72" y="188" class="subtitle">Keep the approved plan sticky, keep findings on disk, keep sessions isolated.</text>
+
+  <g transform="translate(72,248)" filter="url(#shadow)">
+    <rect x="0" y="0" rx="24" ry="24" width="486" height="360" fill="url(#panel)"/>
+    <text x="28" y="40" class="term-title">PLAN ROUND</text>
+    <rect x="28" y="62" width="430" height="2" fill="#2b2b2b"/>
+    <text x="28" y="108" class="term">$ /codex-review:plan deeply review this plan</text>
+    <text x="28" y="160" class="term pulse">Created workflow 20260324-211108-81075e</text>
+    <text x="28" y="202" class="term pulse">Review file: artifacts/plan-review-r1.md</text>
+    <text x="28" y="244" class="term pulse2">HIGH-1 FIX  Add rollback check</text>
+    <text x="28" y="286" class="term pulse2">MEDIUM-1 NO-CHANGE Keep current scope</text>
+    <text x="28" y="328" class="term pulse3">1. Move to implementation</text>
+    <text x="28" y="356" class="term pulse3">2. Run another review round</text>
+    <text x="28" y="384" class="term pulse3">3. Stop and keep this review</text>
+    <text x="430" y="108" class="term accent blink">_</text>
+  </g>
+
+  <g transform="translate(612,248)" filter="url(#shadow)">
+    <rect x="0" y="0" rx="24" ry="24" width="516" height="360" fill="url(#panel)"/>
+    <text x="28" y="40" class="term-title">IMPLEMENTATION ROUND</text>
+    <rect x="28" y="62" width="460" height="2" fill="#2b2b2b"/>
+    <text x="28" y="108" class="term">$ /codex-review:impl review the implementation</text>
+    <text x="28" y="160" class="term pulse">Approved workflow plan round</text>
+    <text x="28" y="202" class="term pulse">Phase advanced to implement (round 1)</text>
+    <text x="28" y="244" class="term pulse2">Review compares against artifacts/plan.md</text>
+    <text x="28" y="286" class="term pulse2 good">FIX  stale session fallback removed</text>
+    <text x="28" y="328" class="term pulse3">Summary: 2 total, 1 fix, 1 no-change</text>
+    <text x="28" y="370" class="term pulse3">Artifacts preserved under workflow history</text>
+    <text x="460" y="108" class="term accent blink">_</text>
+  </g>
+
+  <g transform="translate(92,632)">
+    <rect x="0" y="-24" rx="999" ry="999" width="140" height="34" fill="#e35d38"/>
+    <text x="19" y="-2" class="chip">sticky plan</text>
+    <rect x="156" y="-24" rx="999" ry="999" width="168" height="34" fill="#ffd978"/>
+    <text x="176" y="-2" class="chip">session owned</text>
+    <rect x="342" y="-24" rx="999" ry="999" width="176" height="34" fill="#b7f18a"/>
+    <text x="362" y="-2" class="chip">round history</text>
+  </g>
+</svg>

@@ -1,18 +1,18 @@
 {
-  "name": "codex-review-loop",
+  "name": "codex-review",
   "owner": {
     "name": "boyand"
   },
   "metadata": {
-    "description": "Codex review loop plugin",
-    "homepage": "https://github.com/boyand/codex-review-loop"
+    "description": "Command-driven Claude/Codex review workflow plugin",
+    "homepage": "https://github.com/boyand/codex-review"
   },
   "plugins": [
     {
-      "name": "codex-review-loop",
-      "version": "0.1.0",
+      "name": "codex-review",
+      "version": "0.7.3",
       "source": "./",
-      "description": "N-phase review loop with OpenAI Codex. Automatic plan and implementation review with dynamic phase insertion."
+      "description": "Command-driven Claude/Codex review workflows for multi-round plan and implementation review."
     }
   ]
 }

@@ -3,17 +3,6 @@ package textutil
 
 import "strings"
 
-// Truncate shortens s to maxLen characters, appending "..." if truncated.
-func Truncate(s string, maxLen int) string {
-	if len(s) <= maxLen {
-		return s
-	}
-	if maxLen <= 3 {
-		return s[:maxLen]
-	}
-	return s[:maxLen-3] + "..."
-}
-
 // DecisionTokens are the recognized response tokens in findings files.
 var DecisionTokens = []string{"accept", "reject", "defer", "wontfix", "fix"}
 

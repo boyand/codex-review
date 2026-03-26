@@ -1,6 +1,7 @@
 package lock
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -65,6 +66,16 @@ func TestAcquireConflictLiveLock(t *testing.T) {
 	if err == nil {
 		l.Release()
 		t.Fatal("Acquire with live lock should fail")
+	}
+	var held *HeldError
+	if !errors.As(err, &held) {
+		t.Fatalf("expected HeldError, got %T", err)
+	}
+	if held.OwnerPID != os.Getpid() {
+		t.Fatalf("OwnerPID=%d want %d", held.OwnerPID, os.Getpid())
+	}
+	if held.LockDir != dir {
+		t.Fatalf("LockDir=%q want %q", held.LockDir, dir)
 	}
 }
 

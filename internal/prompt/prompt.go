@@ -35,9 +35,9 @@ func FenceMarkdown(content string) string {
 func BuildReviewPrompt(phaseName, taskDesc, phaseOutputContent, compareToContent, customPrompt string) string {
 	switch phaseName {
 	case "plan":
-		return buildPlanReviewPrompt(taskDesc, phaseOutputContent)
+		return appendReviewFocus(buildPlanReviewPrompt(taskDesc, phaseOutputContent), customPrompt)
 	case "implement":
-		return buildImplementReviewPrompt(taskDesc, compareToContent)
+		return appendReviewFocus(buildImplementReviewPrompt(taskDesc, compareToContent), customPrompt)
 	default:
 		return buildCustomReviewPrompt(phaseName, taskDesc, phaseOutputContent, compareToContent, customPrompt)
 	}
@@ -93,61 +93,10 @@ func buildCustomReviewPrompt(phaseName, taskDesc, phaseOutput, compareToContent,
 	return b.String()
 }
 
-// BuildWorkPrompt constructs the work prompt for a phase.
-func BuildWorkPrompt(phaseName, taskDesc, compareToContent, workPrompt string) string {
-	switch phaseName {
-	case "plan":
-		return buildPlanWorkPrompt(taskDesc)
-	case "implement":
-		return buildImplementWorkPrompt(taskDesc, compareToContent)
-	default:
-		return buildCustomWorkPrompt(phaseName, taskDesc, compareToContent, workPrompt)
+func appendReviewFocus(prompt, customPrompt string) string {
+	customPrompt = strings.TrimSpace(customPrompt)
+	if customPrompt == "" {
+		return prompt
 	}
-}
-
-func buildPlanWorkPrompt(taskDesc string) string {
-	return fmt.Sprintf(`You are producing the implementation plan phase for this task:
-
-%s
-
-Write a practical implementation plan in markdown with:
-1. Codebase analysis assumptions
-2. Step-by-step implementation plan
-3. Risks and edge cases
-4. Files to create/modify
-5. Test strategy
-
-Output only the final plan markdown.`, taskDesc)
-}
-
-func buildImplementWorkPrompt(taskDesc, compareToContent string) string {
-	refBlock := ""
-	if compareToContent != "" {
-		refBlock = fmt.Sprintf("\n\n## Approved Plan Reference\n\n%s", compareToContent)
-	}
-	return fmt.Sprintf(`You are implementing code changes in the current repository.
-
-Task:
-%s%s
-
-Requirements:
-1. Implement the plan in repository files.
-2. Add or update tests where appropriate.
-3. Run relevant tests if possible.
-4. In your final response, summarize changed files, key decisions, and test results.
-
-Output only the final implementation summary markdown.`, taskDesc, refBlock)
-}
-
-func buildCustomWorkPrompt(phaseName, taskDesc, compareToContent, workPrompt string) string {
-	if workPrompt == "" {
-		return fmt.Sprintf("You are executing the '%s' phase for this task:\n\n%s\n\nProduce the phase artifact as structured markdown.\nOutput only the final markdown artifact.", phaseName, taskDesc)
-	}
-
-	refBlock := ""
-	if compareToContent != "" {
-		refBlock = fmt.Sprintf("\n\n## Reference\n\n%s", compareToContent)
-	}
-
-	return fmt.Sprintf("You are executing the '%s' phase for this task:\n\n%s\n\n## Phase Instructions\n\n%s%s\n\nOutput only the final phase markdown artifact.", phaseName, taskDesc, workPrompt, refBlock)
+	return prompt + "\n\n## Additional Review Focus\n\n" + customPrompt + "\n"
 }

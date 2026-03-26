@@ -5,17 +5,25 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/boyand/codex-review-loop/internal/textutil"
+	"github.com/boyand/codex-review/internal/textutil"
 )
 
 var severityRe = regexp.MustCompile(`\[(CRITICAL|HIGH|MEDIUM|LOW)-\d+\]`)
 var noFindingsCountRe = regexp.MustCompile(`(critical|high|medium|low):\s*\d+`)
+var skippedReviewRe = regexp.MustCompile(`(?i)(review was skipped|skipped due|not a git repository|cannot run git diff|unable to run git diff|no git repo|missing git repo)`)
+var timeoutFallbackRe = regexp.MustCompile(`(?i)(review session timed out|timed out during.*review|findings extracted from.*analysis log|extracted from codex analysis log)`)
 
 // IsValid checks if review content is valid: has severity-tagged findings
 // or is an explicit no-findings form with summary counts.
 func IsValid(content string) bool {
+	if timeoutFallbackRe.MatchString(content) {
+		return false
+	}
 	if severityRe.MatchString(content) {
 		return true
+	}
+	if skippedReviewRe.MatchString(content) {
+		return false
 	}
 	return isNoFindingsForm(content)
 }
@@ -103,4 +111,3 @@ func idHasDecision(id, content string) bool {
 	}
 	return false
 }
-

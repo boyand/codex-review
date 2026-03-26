@@ -133,6 +133,27 @@ func TestCountByPhaseRound(t *testing.T) {
 	}
 }
 
+func TestRowsForPhaseRoundOutcomeAndCountSelected(t *testing.T) {
+	l := &Ledger{}
+	l.rows = []Row{
+		{Phase: "plan", Round: "1", FindingID: "HIGH-1", Outcome: "NO-CHANGE", Selected: "yes"},
+		{Phase: "plan", Round: "1", FindingID: "MEDIUM-1", Outcome: "NO-CHANGE", Selected: "no"},
+		{Phase: "plan", Round: "1", FindingID: "LOW-1", Outcome: "FIX", Selected: "yes"},
+		{Phase: "plan", Round: "2", FindingID: "HIGH-2", Outcome: "NO-CHANGE", Selected: "yes"},
+	}
+
+	rows := l.RowsForPhaseRoundOutcome("plan", 1, "NO-CHANGE")
+	if len(rows) != 2 {
+		t.Fatalf("len(rows)=%d want 2", len(rows))
+	}
+	if rows[0].FindingID != "HIGH-1" || rows[1].FindingID != "MEDIUM-1" {
+		t.Fatalf("unexpected rows: %+v", rows)
+	}
+	if got := CountSelected(rows); got != 1 {
+		t.Fatalf("CountSelected=%d want 1", got)
+	}
+}
+
 func TestCountAll(t *testing.T) {
 	l := &Ledger{}
 	l.rows = []Row{

@@ -1,3 +1,4 @@
 .DS_Store
 *.local.md
-.bin/
+.bin/*
+!.bin/codex-review
