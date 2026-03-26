@@ -7,7 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-linux:
+  unit-linux:
+    name: Unit tests (Linux)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +18,8 @@ jobs:
       - run: go build ./cmd/codex-review
       - run: go test -count=1 ./...
 
-  test-macos:
+  unit-macos:
+    name: Unit tests (macOS)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,3 +28,122 @@ jobs:
           go-version: '1.22'
       - run: go build ./cmd/codex-review
       - run: go test -count=1 ./...
+
+  integration-linux:
+    name: Integration (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Install Claude Code CLI (for plugin validate)
+      - run: npm install -g @anthropic-ai/claude-code
+
+      # Validate plugin structure
+      - name: Validate plugin manifest
+        run: claude plugin validate .
+
+      # Test the real wrapper → Go build → binary chain
+      - name: Wrapper builds and runs --version
+        run: |
+          chmod +x .bin/codex-review
+          .bin/codex-review --version
+
+      # Doctor in clean environment (Go present, no Codex, no Claude session)
+      - name: Doctor reports expected state
+        run: |
+          output=$(.bin/codex-review doctor 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "Go toolchain"
+          echo "$output" | grep -q "Codex CLI"
+
+      # Summary with no workflow
+      - name: Summary with no active workflow
+        run: |
+          output=$(.bin/codex-review summary 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "No active workflow found"
+
+      # Status with no workflow
+      - name: Status with no active workflow
+        run: |
+          output=$(.bin/codex-review status 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "No active workflow found"
+
+      # Verify command files exist and have frontmatter
+      - name: Command files are valid
+        run: |
+          for cmd in plan impl status summary doctor; do
+            file="commands/${cmd}.md"
+            if [ ! -f "$file" ]; then
+              echo "FAIL: missing $file"
+              exit 1
+            fi
+            if ! head -1 "$file" | grep -q "^---"; then
+              echo "FAIL: $file missing frontmatter"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
+
+  integration-macos:
+    name: Integration (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin manifest
+        run: claude plugin validate .
+
+      - name: Wrapper builds and runs --version
+        run: |
+          chmod +x .bin/codex-review
+          .bin/codex-review --version
+
+      - name: Doctor reports expected state
+        run: |
+          output=$(.bin/codex-review doctor 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "Go toolchain"
+          echo "$output" | grep -q "Codex CLI"
+
+      - name: Summary with no active workflow
+        run: |
+          output=$(.bin/codex-review summary 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "No active workflow found"
+
+      - name: Status with no active workflow
+        run: |
+          output=$(.bin/codex-review status 2>&1)
+          echo "$output"
+          echo "$output" | grep -q "No active workflow found"
+
+      - name: Command files are valid
+        run: |
+          for cmd in plan impl status summary doctor; do
+            file="commands/${cmd}.md"
+            if [ ! -f "$file" ]; then
+              echo "FAIL: missing $file"
+              exit 1
+            fi
+            if ! head -1 "$file" | grep -q "^---"; then
+              echo "FAIL: $file missing frontmatter"
+              exit 1
+            fi
+            echo "OK: $file"
+          done
