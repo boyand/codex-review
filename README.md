@@ -1,29 +1,26 @@
 # codex-review
 
-Command-driven review loops for Claude Code and Codex.
-
-`codex-review` turns "review this plan" and "review this implementation" into a repeatable workflow with:
-- session-owned workflows
-- sticky reviewed plans
-- explicit findings and responses
-- multi-round review without losing history
+A Claude Code plugin for multi-round Codex reviews of plans and implementations.
 
 ![codex-review demo](docs/demo.svg)
 
 ## Why this exists
 
-Most AI review flows break down in the same places:
-- the plan changes underneath the review
-- implementation review loses the approved plan context
-- multiple Claude threads in one repo step on each other
-- findings get discussed in chat and then disappear
+I get the best results when Claude and Codex work together. Claude plans, Codex reviews the plan, Claude implements, Codex reviews the implementation. Two models checking each other's work.
 
-`codex-review` fixes those problems with a narrow command surface:
-- `/codex-review:plan`
-- `/codex-review:impl`
-- `/codex-review:summary`
-- `/codex-review:status`
-- `/codex-review:doctor`
+The problem is that this loop falls apart fast without structure:
+- the plan drifts between review rounds
+- implementation review loses the approved plan context
+- findings get discussed in chat and disappear
+- multiple Claude sessions in the same repo step on each other
+
+I wanted something I could reliably run — not a framework, just a thin repeatable workflow. Five commands:
+
+- `/codex-review:plan` — review the plan
+- `/codex-review:impl` — review the implementation
+- `/codex-review:summary` — see what was decided
+- `/codex-review:status` — check the workflow state
+- `/codex-review:doctor` — diagnose when things go wrong
 
 ## What it does
 
@@ -107,18 +104,9 @@ Use it when:
 
 ## The core idea
 
-This plugin is intentionally small.
+Claude plans. Codex reviews. Claude implements. Codex reviews again.
 
-It does not try to be:
-- a generic agent framework
-- a dashboard product
-- a hidden hook state machine
-
-It is just a thin workflow around two high-value operations:
-- review the plan
-- review the implementation
-
-That constraint is the product.
+This plugin makes that loop repeatable. It does not try to be a framework, a dashboard, or an agent runtime. It is a thin workflow around two operations — review the plan, review the implementation — and that constraint is the point.
 
 ## How the workflow is stored
 
