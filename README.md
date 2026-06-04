@@ -144,7 +144,7 @@ Internal transition commands still exist, but Claude runs them for you after you
 
 | Environment Variable | Default | Description |
 |---------------------|---------|-------------|
-| `CODEX_REVIEW_MODEL` | `gpt-5.3-codex` | Codex model for reviewer runs |
+| `CODEX_REVIEW_MODEL` | `gpt-5.5` | Codex model for reviewer runs |
 | `CODEX_REVIEW_FLAGS` | `--sandbox=read-only` | Flags for Codex reviewer runs |
 | `CODEX_WORKER_FLAGS` | `--sandbox=workspace-write` | Flags for Codex worker runs |
 | `CODEX_CALL_TIMEOUT_SEC` | `720` | Per-call Codex execution timeout in seconds |

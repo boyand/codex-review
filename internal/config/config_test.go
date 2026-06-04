@@ -12,8 +12,8 @@ func TestLoadDefaults(t *testing.T) {
 	}
 
 	c := Load()
-	if c.CodexModel != "gpt-5.3-codex" {
-		t.Errorf("CodexModel = %q, want %q", c.CodexModel, "gpt-5.3-codex")
+	if c.CodexModel != "gpt-5.5" {
+		t.Errorf("CodexModel = %q, want %q", c.CodexModel, "gpt-5.5")
 	}
 	if c.CodexReviewFlags != "--sandbox=read-only" {
 		t.Errorf("CodexReviewFlags = %q, want %q", c.CodexReviewFlags, "--sandbox=read-only")

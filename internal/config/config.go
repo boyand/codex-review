@@ -18,7 +18,7 @@ type Config struct {
 // Load reads configuration from environment variables with defaults.
 func Load() Config {
 	return Config{
-		CodexModel:       envOrAny([]string{"CODEX_REVIEW_MODEL", "CODEX_REVIEW_LOOP_MODEL"}, "gpt-5.3-codex"),
+		CodexModel:       envOrAny([]string{"CODEX_REVIEW_MODEL", "CODEX_REVIEW_LOOP_MODEL"}, "gpt-5.5"),
 		CodexReviewFlags: envOrAny([]string{"CODEX_REVIEW_FLAGS", "CODEX_REVIEW_LOOP_FLAGS"}, "--sandbox=read-only"),
 		CodexWorkerFlags: envOr("CODEX_WORKER_FLAGS", "--sandbox=workspace-write"),
 		CallTimeoutSec:   envIntOr("CODEX_CALL_TIMEOUT_SEC", 720),
