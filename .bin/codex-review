@@ -45,7 +45,40 @@ parent_pid() {
     ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' '
 }
 
+# Find the pid of the Claude session whose session file advertises session_id.
+# The session file name is the pid; we confirm via its recorded sessionId.
+session_pid_for_id() {
+    local want="$1"
+    local f sid base
+    for f in "$HOME"/.claude/sessions/*.json; do
+        [[ -f "$f" ]] || continue
+        sid="$(read_session_id "$f")"
+        if [[ "$sid" == "$want" ]]; then
+            base="$(basename "$f")"
+            base="${base%.json}"
+            if [[ "$base" =~ ^[0-9]+$ ]]; then
+                printf '%s\n' "$base"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
 resolve_session_hints() {
+    # Prefer the session id Claude Code exports in the environment. The ps-based
+    # parent walk below does not work on every platform (e.g. Git Bash on
+    # Windows, where `ps -o ppid=` yields nothing), so trust the env var first
+    # and recover the pid from the matching session file.
+    local env_id="${CLAUDE_CODE_SESSION_ID:-}"
+    if [[ "$env_id" =~ ^[0-9a-fA-F-]{36}$ ]]; then
+        local env_pid
+        if env_pid="$(session_pid_for_id "$env_id")"; then
+            printf '%s %s\n' "$env_pid" "$env_id"
+            return 0
+        fi
+    fi
+
     local pid="${PPID:-}"
     local depth=0
     while [[ -n "$pid" && "$pid" =~ ^[0-9]+$ && "$pid" -gt 1 && "$depth" -lt 8 ]]; do
