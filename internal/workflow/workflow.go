@@ -283,7 +283,10 @@ func resolvePlanFromSession(home string, session *claudeRuntimeSession) (string,
 	for _, transcript := range transcripts {
 		path, err := resolvePlanFromTranscript(home, transcript)
 		if err != nil {
-			return "", err
+			// A malformed or unreadable candidate (e.g. an invalid path on
+			// Windows) must not abort resolution: later candidates from the
+			// glob fallback may still hold the plan.
+			continue
 		}
 		if strings.TrimSpace(path) != "" {
 			return path, nil
@@ -682,7 +685,20 @@ func encodeClaudeProjectKey(cwd string) string {
 	if clean == "." || clean == "" {
 		return ""
 	}
-	return strings.ReplaceAll(clean, string(filepath.Separator), "-")
+	// Claude Code names the transcript directory after the cwd with every
+	// character outside [A-Za-z0-9] replaced by '-'. Replacing only the OS path
+	// separator leaves Windows drive colons and spaces intact, producing a path
+	// that is invalid on Windows (e.g. "D:-Claude prototypes-roads-to-ruin").
+	var b strings.Builder
+	b.Grow(len(clean))
+	for _, r := range clean {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+		} else {
+			b.WriteByte('-')
+		}
+	}
+	return b.String()
 }
 
 func isValidClaudePlanPath(path string) bool {
