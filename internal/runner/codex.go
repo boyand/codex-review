@@ -67,11 +67,17 @@ func codexExecOnce(cfg config.Config, prompt, outputFile string, flags []string,
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	args := []string{"exec", prompt}
+	// Pass the prompt via stdin ("codex exec -") instead of as a command-line
+	// argument. Review prompts can be large, and a big argv blows past the
+	// command-line length limit — on Windows the CLI resolves to codex.cmd
+	// (cmd.exe, ~8191 chars), which silently truncates the tail, dropping
+	// trailing flags like -m and falling back to the config.toml model.
+	args := []string{"exec", "-"}
 	args = append(args, flags...)
 	args = append(args, "--output-last-message", outputFile, "-m", cfg.CodexModel)
 
 	cmd := exec.CommandContext(ctx, "codex", args...)
+	cmd.Stdin = strings.NewReader(prompt)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 
