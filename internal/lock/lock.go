@@ -113,8 +113,3 @@ func (l *Lock) installSignalHandler() {
 		os.Exit(130)
 	}()
 }
-
-func processAlive(pid int) bool {
-	err := syscall.Kill(pid, 0)
-	return err == nil
-}
